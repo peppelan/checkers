@@ -22,6 +22,11 @@ func (k msgServer) PlayMove(goCtx context.Context, msg *types.MsgPlayMove) (*typ
 		panic(err.Error())
 	}
 
+	// is the game finished?
+	if sg.Winner != rules.PieceStrings[rules.NO_PLAYER] {
+		return nil, types.ErrGameFinished
+	}
+
 	// am I a player?
 	if msg.Creator != sg.Red && msg.Creator != sg.Black {
 		return nil, types.ErrCreatorNotPlayer
@@ -51,8 +56,15 @@ func (k msgServer) PlayMove(goCtx context.Context, msg *types.MsgPlayMove) (*typ
 		return nil, types.ErrWrongMove
 	}
 
-	sg.Board = game.String()
 	sg.Turn = rules.PieceStrings[game.Turn]
+	sg.Winner = rules.PieceStrings[game.Winner()]
+
+	if sg.Winner == rules.PieceStrings[rules.NO_PLAYER] {
+		sg.Board = ""
+	} else {
+		sg.Board = game.String()
+	}
+
 	k.SetStoredGame(ctx, sg)
 
 	ctx.EventManager().EmitEvent(sdk.NewEvent(
@@ -62,6 +74,7 @@ func (k msgServer) PlayMove(goCtx context.Context, msg *types.MsgPlayMove) (*typ
 		sdk.NewAttribute(types.MovePlayedEventCapturedX, fmt.Sprintf("%d", captPos.X)),
 		sdk.NewAttribute(types.MovePlayedEventCapturedY, fmt.Sprintf("%d", captPos.Y)),
 		sdk.NewAttribute(types.MovePlayedEventWinner, rules.PieceStrings[game.Winner()]),
+		sdk.NewAttribute(types.MovePlayedEventBoard, sg.Board),
 	))
 
 	return &types.MsgPlayMoveResponse{

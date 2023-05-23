@@ -22,11 +22,12 @@ func (k msgServer) CreateGame(goCtx context.Context, msg *types.MsgCreateGame) (
 
 	game := rules.New()
 	sg := types.StoredGame{
-		Index: fmt.Sprintf("%d", newId),
-		Board: game.String(),
-		Turn:  rules.PieceStrings[game.Turn],
-		Red:   msg.Red,
-		Black: msg.Black,
+		Index:  fmt.Sprintf("%d", newId),
+		Board:  game.String(),
+		Turn:   rules.PieceStrings[game.Turn],
+		Red:    msg.Red,
+		Black:  msg.Black,
+		Winner: rules.PieceStrings[rules.NO_PLAYER],
 	}
 
 	if err := sg.Validate(); err != nil {

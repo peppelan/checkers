@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/peppelan/checkers/x/checkers/rules"
 	"github.com/peppelan/checkers/x/checkers/types"
@@ -53,6 +54,15 @@ func (k msgServer) PlayMove(goCtx context.Context, msg *types.MsgPlayMove) (*typ
 	sg.Board = game.String()
 	sg.Turn = rules.PieceStrings[game.Turn]
 	k.SetStoredGame(ctx, sg)
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.MovePlayedEventType,
+		sdk.NewAttribute(types.MovePlayedEventCreator, msg.Creator),
+		sdk.NewAttribute(types.MovePlayedEventGameIndex, sg.Index),
+		sdk.NewAttribute(types.MovePlayedEventCapturedX, fmt.Sprintf("%d", captPos.X)),
+		sdk.NewAttribute(types.MovePlayedEventCapturedY, fmt.Sprintf("%d", captPos.Y)),
+		sdk.NewAttribute(types.MovePlayedEventWinner, rules.PieceStrings[game.Winner()]),
+	))
 
 	return &types.MsgPlayMoveResponse{
 		CapturedX: int32(captPos.X),

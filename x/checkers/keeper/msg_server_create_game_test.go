@@ -34,6 +34,7 @@ func TestCreateGame(t *testing.T) {
 func TestCreate1GameHasSaved(t *testing.T) {
 	// arrange
 	msgServer, k, ctx := setupMsgServerCreateGame(t)
+	uCtx := sdk.UnwrapSDKContext(ctx)
 
 	// act
 	createResponse, err := msgServer.CreateGame(ctx, &types.MsgCreateGame{
@@ -56,9 +57,22 @@ func TestCreate1GameHasSaved(t *testing.T) {
 			Black: bob,
 			Red:   carol,
 		},
-	}, k.GetAllStoredGame(sdk.UnwrapSDKContext(ctx)))
+	}, k.GetAllStoredGame(uCtx))
 
-	systemInfo, found := k.GetSystemInfo(sdk.UnwrapSDKContext(ctx))
+	systemInfo, found := k.GetSystemInfo(uCtx)
 	require.True(t, found)
 	assert.EqualValues(t, types.SystemInfo{NextId: 2}, systemInfo)
+
+	events := sdk.StringifyEvents(uCtx.EventManager().ABCIEvents())
+	require.Equal(t, 1, len(events))
+
+	assert.EqualValues(t, sdk.StringEvent{
+		Type: "new-game-created",
+		Attributes: []sdk.Attribute{
+			{Key: "creator", Value: alice},
+			{Key: "game-index", Value: "1"},
+			{Key: "black", Value: bob},
+			{Key: "red", Value: carol},
+		},
+	}, events[0])
 }

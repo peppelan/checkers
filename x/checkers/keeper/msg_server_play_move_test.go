@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -41,6 +42,22 @@ func TestPlayMove(t *testing.T) {
 		CapturedY: -1,
 		Winner:    "*",
 	}, *playMoveResponse)
+
+	uCtx := sdk.UnwrapSDKContext(context)
+	events := sdk.StringifyEvents(uCtx.EventManager().ABCIEvents())
+	require.Equal(t, 2, len(events))
+
+	assert.EqualValues(t, sdk.StringEvent{
+		Type: "move-played",
+		Attributes: []sdk.Attribute{
+			{Key: "creator", Value: bob},
+			{Key: "game-index", Value: "1"},
+			{Key: "captured-x", Value: "-1"},
+			{Key: "captured-y", Value: "-1"},
+			{Key: "winner", Value: "*"},
+		},
+	}, events[0])
+
 }
 
 func TestPlayMoveGameNotFound(t *testing.T) {

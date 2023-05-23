@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/peppelan/checkers/x/checkers/rules"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,21 +17,6 @@ func (k msgServer) CreateGame(goCtx context.Context, msg *types.MsgCreateGame) (
 		panic("SystemInfo not found")
 	}
 
-	black, err := sdk.AccAddressFromBech32(msg.Black)
-	if err != nil {
-		return nil, errors.Wrapf(err, types.ErrInvalidBlack.Error(), msg.Black)
-	}
-
-	red, err := sdk.AccAddressFromBech32(msg.Red)
-	if err != nil {
-		return nil, errors.Wrapf(err, types.ErrInvalidRed.Error(), msg.Red)
-	}
-
-	creator, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		return nil, errors.Wrapf(err, types.ErrGameInvalidCreator.Error(), creator)
-	}
-
 	newId := si.NextId
 	si.NextId += 1
 
@@ -40,9 +24,9 @@ func (k msgServer) CreateGame(goCtx context.Context, msg *types.MsgCreateGame) (
 	sg := types.StoredGame{
 		Index: fmt.Sprintf("%d", newId),
 		Board: game.String(),
-		Turn:  "b",
-		Red:   red.String(),
-		Black: black.String(),
+		Turn:  rules.PieceStrings[game.Turn],
+		Red:   msg.Red,
+		Black: msg.Black,
 	}
 
 	if err := sg.Validate(); err != nil {

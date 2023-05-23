@@ -46,12 +46,12 @@ func (msg *MsgCreateGame) ValidateBasic() error {
 
 	_, err = sdk.AccAddressFromBech32(msg.Black)
 	if err != nil {
-		return sdkerrors.Wrapf(err, ErrInvalidBlack.Error(), msg.Black)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid black address (%s)", err)
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.Red)
 	if err != nil {
-		return sdkerrors.Wrapf(err, ErrInvalidRed.Error(), msg.Red)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid red address (%s)", err)
 	}
 
 	return nil

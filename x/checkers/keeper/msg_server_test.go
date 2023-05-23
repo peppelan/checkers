@@ -12,5 +12,6 @@ import (
 
 func setupMsgServer(t testing.TB) (types.MsgServer, context.Context) {
 	k, ctx := keepertest.CheckersKeeper(t)
+	k.SetSystemInfo(ctx, types.SystemInfo{NextId: 123})
 	return keeper.NewMsgServerImpl(*k), sdk.WrapSDKContext(ctx)
 }

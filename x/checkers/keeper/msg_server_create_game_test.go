@@ -14,7 +14,7 @@ func TestCreateGame(t *testing.T) {
 		Red:     carol,
 	})
 	require.Nil(t, err)
-	require.EqualValues(t, types.MsgCreateGameResponse{
-		GameIndex: "", // TODO: update with a proper value when updated
-	}, *createResponse)
+	require.EqualValues(t, &types.MsgCreateGameResponse{
+		GameIndex: "123",
+	}, createResponse)
 }
